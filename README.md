@@ -1,35 +1,188 @@
 # Mbrcode
 
-TODO: Delete this and the text below, and describe your gem
+**Mbrcode** is a lightweight, deterministic, and clean **membership code generator** for Ruby applications.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/mbrcode`. To experiment with that code, run `bin/console` for an interactive prompt.
+It produces stable, structured IDs using the format:
 
-## Installation
+PREFIX + SHARD + "-" + DIGITS
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+Where:
 
-Install the gem and add to the application's Gemfile by executing:
+- **PREFIX** → normalized to exactly 4 characters
+- **SHARD** → numeric grouping/version number
+- **DIGITS** → auto-incrementing sequence
+- **Raw length before dashes** = **EXACTLY 16 characters**
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+Example output:
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+MBR1-0000-0000-000
 
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+Mbrcode is ideal for membership systems, gyms, schools, apps, organizations, ERPs, identity platforms, and anything requiring clean, compact, and consistent codes.
 
-## Usage
+---
 
-TODO: Write usage instructions here
+## ✨ Features
 
-## Development
+- 🔒 Thread-safe incremental counter
+- 🧩 Smart prefix normalization rules
+- 📏 Always 16 raw characters before dash grouping
+- 🔣 Groups digits into 4-4-4 format when possible
+- ⚙️ Configurable prefix and shard
+- 💎 Zero external dependencies
+- 🚀 Fast, simple, production-ready
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+---
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+## 📦 Installation
 
-## Contributing
+Add to your Gemfile:
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/mbrcode.
+```ruby
+gem "mbrcode"
+```
 
-## License
+Install:
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+```bash
+bundle install
+```
+
+Or install manually:
+
+```bash
+gem install mbrcode
+```
+
+---
+
+## 🚀 Usage
+
+### Default generation
+
+```ruby
+Mbrcode.generate
+# => "MBR1-0000-0000-000"
+```
+
+### Custom prefix
+
+```ruby
+Mbrcode.generate(prefix: "user")
+# => "USER1-0000-0000-000"
+```
+
+### Multi-word prefix → initials
+
+```ruby
+Mbrcode.generate(prefix: "karate membership")
+# => "KM00-0000-0000-000"
+```
+
+### Prefix shorter than 4 chars → padded
+
+```ruby
+Mbrcode.generate(prefix: "ab")
+# => "AB00-0000-0000-000"
+```
+
+### Long prefix → first 4 characters
+
+```ruby
+Mbrcode.generate(prefix: "customer")
+# => "CUST1-0000-0000-000"
+```
+
+### Custom shard
+
+```ruby
+Mbrcode.generate(prefix: "mbr", shard: 2)
+# => "MBR2-0000-0000-000"
+```
+
+---
+
+## 🧠 Prefix Normalization Rules
+
+| Input Prefix        | Output Prefix | Rule Applied           |
+|---------------------|---------------|-------------------------|
+| "m"                 | "M000"        | padded to 4 characters |
+| "ab"                | "AB00"        | padded to 4 characters |
+| "karate membership" | "KM00"        | initials + padded      |
+| "ruby on rails"     | "ROR0"        | initials + padded      |
+| "customer"          | "CUST"        | first 4 characters     |
+| "USER"              | "USER"        | unchanged (4 chars)    |
+
+---
+
+## 🔢 16-Character Enforcement
+
+Before grouping and adding dashes, the ID ALWAYS equals:
+
+PREFIX(4) + SHARD(N) + DIGITS(M) = 16 characters
+
+If the shard leaves no space for digits:
+
+```ruby
+Mbrcode.generate(prefix: "abcd", shard: 999999999)
+# => raises "Shard too long"
+```
+
+This ensures consistent, predictable, compact membership IDs.
+
+---
+
+## 🧪 Testing
+
+Run RSpec tests:
+
+```bash
+bundle exec rspec
+```
+
+All tests should pass.
+
+---
+
+## 🛠 Development
+
+Clone the repository:
+
+```bash
+git clone https://github.com/delacruzjames/mbrcode.git
+cd mbrcode
+```
+
+Install dependencies:
+
+```bash
+bundle install
+```
+
+Run tests:
+
+```bash
+bundle exec rspec
+```
+
+---
+
+## 🤝 Contributing
+
+Pull requests are welcome!  
+Please include tests for new features or bug fixes.
+
+---
+
+## 📜 License
+
+Released under the **MIT License**.
+
+---
+
+## 👤 Author
+
+**Sensei James Dela Cruz**  
+Ruby Developer • API Architect • Karate Instructor
+
+📧 Email: `delacruzjamesmartin@gmail.com`  
+🐙 GitHub: `@delacruzjames`
