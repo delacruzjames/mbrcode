@@ -8,71 +8,60 @@ module Mbrcode
 
   class << self
     #
-    # New Rules:
-    # - Prefix processed to exactly 4 chars using logic described
-    # - MAX 16 digits total after prefix+shard
+    # GENERATE MEMBERSHIP CODE
     #
     def generate(prefix: "mbr", shard: 1)
+      shard_str = shard.to_i.to_s
+
+      # STRICT: shard must be <= 3 characters always
+      raise "Shard too long" if shard_str.length > 3
+
       prefix_str = normalize_prefix(prefix)
-      shard_str  = shard.to_i.to_s
 
       seq = next_sequence
 
-      # remaining characters allowed for digits
       max_digits = 16 - (prefix_str.length + shard_str.length)
-
-      # enforce enough space for meaningful numbering
       raise "Shard too long" if max_digits < 4
 
-      digits = format("%0#{max_digits}d", seq)
-
-      grouped =
-        if max_digits > 4
-          digits.scan(/.{1,4}/).join("-")
-        else
-          digits
-        end
+      digits  = format("%0#{max_digits}d", seq)
+      grouped = digits.scan(/.{1,4}/).join("-")
 
       "#{prefix_str}#{shard_str}-#{grouped}"
     end
 
     private
 
-    # -----------------------------
-    # PREFIX NORMALIZATION LOGIC
-    # -----------------------------
+    # -----------------------------------------------------------
+    # PREFIX NORMALIZATION BASED ON YOUR SPECIFIC RULES
+    # -----------------------------------------------------------
     def normalize_prefix(prefix)
       str = prefix.to_s.strip.upcase
 
-      # Multi-word? Use initials.
+      # 1) MULTI-WORD PREFIX → INITIALS (max 2 chars) → pad to 3
       if str.include?(" ")
         initials = str.split.map { |w| w[0] }.join
-        return pad_or_trim(initials)
+        return initials[0, 2].ljust(3, "0")
       end
 
-      # Single word:
-      if str.length < 4
-        return pad_or_trim(str)
+      # 2) SINGLE-WORD RULES
+      case str.length
+      when 1, 2
+        return str.ljust(3, "0")
+      when 3
+        return str
+      when 4
+        return str[0, 3]
       else
-        # Use first 4 chars
-        return str[0, 4]
-      end
-    end
-
-    def pad_or_trim(str)
-      if str.length >= 4
-        str[0, 4]
-      else
-        # pad numbers until length = 4
-        str.ljust(4, "0")
+        mid = (str.length / 2) - 1
+        return str[mid, 3]
       end
     end
 
     def next_sequence
       synchronize do
-        current = @sequence
+        cur = @sequence
         @sequence += 1
-        current
+        cur
       end
     end
   end
