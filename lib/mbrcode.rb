@@ -1,8 +1,9 @@
 require "mbrcode/version"
-require "mutex_m"
+require "monitor"
+extend MonitorMixin
 
 module Mbrcode
-  extend Mutex_m
+  extend MonitorMixin
 
   @sequence = 0
 
@@ -59,9 +60,9 @@ module Mbrcode
 
     def next_sequence
       synchronize do
-        cur = @sequence
+        current = @sequence
         @sequence += 1
-        cur
+        current
       end
     end
   end

@@ -1,14 +1,12 @@
 PATH
   remote: .
   specs:
-    mbrcode (0.1.1)
-      mutex_m
+    mbrcode (0.1.2)
 
 GEM
   remote: https://rubygems.org/
   specs:
     diff-lcs (1.6.2)
-    mutex_m (0.3.0)
     rake (13.0.3)
     rspec (3.13.2)
       rspec-core (~> 3.13.0)
